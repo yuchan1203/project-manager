@@ -1,0 +1,86 @@
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+
+export default function ProjectManager() {
+  const [projects, setProjects] = useState([]);
+  const [newProject, setNewProject] = useState({ title: "", description: "", tags: "" });
+  const [editingProject, setEditingProject] = useState(null);
+
+  const addProject = () => {
+    if (!newProject.title) return;
+    setProjects([...projects, { ...newProject, id: Date.now() }]);
+    setNewProject({ title: "", description: "", tags: "" });
+  };
+
+  const editProject = (id) => {
+    const project = projects.find((p) => p.id === id);
+    setEditingProject(project);
+  };
+
+  const saveProject = () => {
+    setProjects(
+      projects.map((p) => (p.id === editingProject.id ? editingProject : p))
+    );
+    setEditingProject(null);
+  };
+
+  return (
+    <div className="p-6 max-w-3xl mx-auto space-y-6">
+      <h1 className="text-2xl font-bold">프로젝트 기획서 관리</h1>
+      <div className="space-y-2">
+        <Input
+          placeholder="프로젝트 제목"
+          value={newProject.title}
+          onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
+        />
+        <Textarea
+          placeholder="프로젝트 설명"
+          value={newProject.description}
+          onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+        />
+        <Input
+          placeholder="태그 (쉼표로 구분)"
+          value={newProject.tags}
+          onChange={(e) => setNewProject({ ...newProject, tags: e.target.value })}
+        />
+        <Button onClick={addProject}>추가</Button>
+      </div>
+      <div className="space-y-4">
+        {projects.map((project) => (
+          <Card key={project.id}>
+            <CardContent className="p-4">
+              {editingProject?.id === project.id ? (
+                <div className="space-y-2">
+                  <Input
+                    value={editingProject.title}
+                    onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })}
+                  />
+                  <Textarea
+                    value={editingProject.description}
+                    onChange={(e) => setEditingProject({ ...editingProject, description: e.target.value })}
+                  />
+                  <Input
+                    value={editingProject.tags}
+                    onChange={(e) => setEditingProject({ ...editingProject, tags: e.target.value })}
+                  />
+                  <Button onClick={saveProject}>저장</Button>
+                </div>
+              ) : (
+                <div>
+                  <h2 className="text-xl font-semibold">{project.title}</h2>
+                  <p className="text-gray-700">{project.description}</p>
+                  <p className="text-sm text-gray-500">태그: {project.tags}</p>
+                  <p className="text-sm text-blue-500">공유 링크: {window.location.origin}/project/{project.id}</p>
+                  <Button onClick={() => editProject(project.id)}>수정</Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
