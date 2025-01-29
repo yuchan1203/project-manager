@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>프로젝트 기획서 관리</title>
+  <style>
+    /* Add some basic styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .container {
+      max-width: 800px;
+      width: 100%;
+      padding: 20px;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .space-y-2 > * {
+      margin-bottom: 10px;
+    }
+    .space-y-4 > * {
+      margin-bottom: 20px;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+    button {
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .card {
+      border: 1px solid #ddd;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      background-color: #fff;
+    }
+    .card-content {
+      padding: 20px;
+    }
+    .text-blue-500 {
+      color: #007bff;
+    }
+    .text-sm {
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-2xl font-bold">프로젝트 기획서 관리</h1>
+
+    <div class="space-y-2">
+      <input id="newProjectTitle" placeholder="프로젝트 제목" />
+      <textarea id="newProjectDescription" placeholder="프로젝트 설명"></textarea>
+      <input id="newProjectTags" placeholder="태그 (쉼표로 구분)" />
+      <button onclick="addProject()">추가</button>
+    </div>
+
+    <div id="projectsList" class="space-y-4">
+      <!-- Projects will be added here dynamically -->
+    </div>
+  </div>
+
+  <script>
+    let projects = [];
+    let editingProject = null;
+
+    function renderProjects() {
+      const projectsList = document.getElementById("projectsList");
+      projectsList.innerHTML = "";
+      projects.forEach(project => {
+        const projectCard = document.createElement("div");
+        projectCard.classList.add("card");
+
+        const projectContent = document.createElement("div");
+        projectContent.classList.add("card-content");
+
+        if (editingProject?.id === project.id) {
+          const titleInput = document.createElement("input");
+          titleInput.value = editingProject.title;
+          titleInput.oninput = (e) => {
+            editingProject.title = e.target.value;
+          };
+
+          const descriptionTextarea = document.createElement("textarea");
+          descriptionTextarea.value = editingProject.description;
+          descriptionTextarea.oninput = (e) => {
+            editingProject.description = e.target.value;
+          };
+
+          const tagsInput = document.createElement("input");
+          tagsInput.value = editingProject.tags;
+          tagsInput.oninput = (e) => {
+            editingProject.tags = e.target.value;
+          };
+
+          const saveButton = document.createElement("button");
+          saveButton.textContent = "저장";
+          saveButton.onclick = saveProject;
+
+          projectContent.appendChild(titleInput);
+          projectContent.appendChild(descriptionTextarea);
+          projectContent.appendChild(tagsInput);
+          projectContent.appendChild(saveButton);
+        } else {
+          const title = document.createElement("h2");
+          title.textContent = project.title;
+          title.classList.add("text-xl", "font-semibold");
+
+          const description = document.createElement("p");
+          description.textContent = project.description;
+          description.classList.add("text-gray-700");
+
+          const tags = document.createElement("p");
+          tags.textContent = `태그: ${project.tags}`;
+          tags.classList.add("text-sm", "text-gray-500");
+
+          const shareLink = document.createElement("p");
+          shareLink.textContent = `공유 링크: ${window.location.origin}/project/${project.id}`;
+          shareLink.classList.add("text-sm", "text-blue-500");
+
+          const editButton = document.createElement("button");
+          editButton.textContent = "수정";
+          editButton.onclick = () => editProject(project.id);
+
+          projectContent.appendChild(title);
+          projectContent.appendChild(description);
+          projectContent.appendChild(tags);
+          projectContent.appendChild(shareLink);
+          projectContent.appendChild(editButton);
+        }
+
+        projectCard.appendChild(projectContent);
+        projectsList.appendChild(projectCard);
+      });
+    }
+
+    function addProject() {
+      const title = document.getElementById("newProjectTitle").value;
+      const description = document.getElementById("newProjectDescription").value;
+      const tags = document.getElementById("newProjectTags").value;
+
+      if (!title) return;
+
+      const newProject = { title, description, tags, id: Date.now() };
+      projects.push(newProject);
+
+      document.getElementById("newProjectTitle").value = "";
+      document.getElementById("newProjectDescription").value = "";
+      document.getElementById("newProjectTags").value = "";
+
+      renderProjects();
+    }
+
+    function editProject(id) {
+      editingProject = projects.find(p => p.id === id);
+      renderProjects();
+    }
+
+    function saveProject() {
+      projects = projects.map(p => (p.id === editingProject.id ? editingProject : p));
+      editingProject = null;
+      renderProjects();
+    }
+  </script>
+</body>
+</html>
